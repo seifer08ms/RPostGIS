@@ -2,7 +2,7 @@
 % Please edit documentation in R/readOgrSql.R
 \name{readOgrSql}
 \alias{readOgrSql}
-\title{Define a filename from current date.}
+\title{Read an PostgreSQL data source into Spatial objects.}
 \usage{
 readOgrSql(dsn, sql, ...)
 }
@@ -11,9 +11,6 @@ readOgrSql(dsn, sql, ...)
 }
 \value{
 Spatial DataFrame
-}
-\description{
-Define a filename from current date.
 }
 \examples{
 \dontrun{ strSQL = "

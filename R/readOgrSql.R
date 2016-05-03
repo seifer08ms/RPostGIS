@@ -1,5 +1,4 @@
-#' Define a filename from current date.
-#'
+#' @title Read an PostgreSQL data source into Spatial objects.
 #' @param dsn PostgreSQL DSNs
 #' @return Spatial DataFrame
 #' @keywords readOgrSql
