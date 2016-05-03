@@ -1,0 +1,13 @@
+Package: RPostGIS
+Title: a package for manipulating data with PostGIS
+Version: 0.0.0.9000
+Authors@R: person("Chenliang", "Wang", email = "hi181904665@gmail.com", role = c("aut", "cre"))
+Description: a package for manipulating data with PostGIS
+Depends:
+    R (>= 3.0.1)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Maintainer: Chenliang Wang <hi181904665@gmail.com>
+Author: Chenliang Wang [aut, cre]
+RoxygenNote: 5.0.1
