@@ -8,6 +8,10 @@ readOgrSql(dsn, sql, ...)
 }
 \arguments{
 \item{dsn}{PostgreSQL DSNs}
+
+\item{sql}{a character vector of length 1 containing SQL}
+
+\item{...}{Other parameters passed on to methods.}
 }
 \value{
 Spatial DataFrame

@@ -1,5 +1,7 @@
 #' @title Read an PostgreSQL data source into Spatial objects.
 #' @param dsn PostgreSQL DSNs
+#' @param sql a character vector of length 1 containing SQL
+#' @param ... Other parameters passed on to methods.
 #' @return Spatial DataFrame
 #' @keywords readOgrSql
 #' @export
