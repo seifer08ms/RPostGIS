@@ -3,8 +3,7 @@ Title: a package for manipulating data with PostGIS
 Version: 0.0.0.9000
 Authors@R: person("Chenliang", "Wang", email = "hi181904665@gmail.com", role = c("aut", "cre"))
 Description: a package for manipulating data with PostGIS
-Depends:
-    R (>= 3.0.1)
+Depends: R (>= 3.0.1), rgdal, RPostgreSQL, stringr
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
