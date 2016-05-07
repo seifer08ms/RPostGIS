@@ -30,7 +30,6 @@ readOgrSql = function (dsn, sql, ...) {
     }
     tolower(os)
   }
-
   require(rgdal)
   require(RPostgreSQL)
   require(stringr)
@@ -68,43 +67,28 @@ readOgrSql = function (dsn, sql, ...) {
   dbSendQuery(conn, strCreateView)
   sql_encoding<-
     "SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = 'mydb';"
-  db_encode<-dbGetQuery(conn, sql_encoding)
+  db_encode<-dbGetQuery(conn, sql_encoding)$pg_encoding_to_char
   if(as.character(get_os())=='windows'){
-    ogr2ogr(src_datasource_name = dsn,
-            layer = 'vw_tmp_read_ogr',verbose = T,f = 'ESRI Shapefile',
-            dst_datasource_name = tempdir(),overwrite = T)
-    spdfFinal = readOGR(dsn = file.path(tempdir(),'vw_tmp_read_ogr.shp'),
-                        layer = "vw_tmp_read_ogr",stringsAsFactors = F, ...)
-    # library(RPostgreSQL)
-    # library(rgeos)
-    # library(sp)
-    # dfTemp = dbGetQuery(conn, 'select * from vw_tmp_read_ogr;')
-    # row.names(dfTemp) = dfTemp$gid
-    # # Create spatial polygons
-    # # To set the PROJ4 string, enter the EPSG SRID and uncomment the
-    # # following two lines:
-    # # EPSG = make_EPSG()
-    # # p4s = EPSG[which(EPSG$code == SRID), "prj4"]
-    # for (i in seq(nrow(dfTemp))) {
-    #   if (i == 1) {
-    #     spTemp = readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i])
-    #     # If the PROJ4 string has been set, use the following instead
-    #     # spTemp = readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i], p4s)
-    #   }
-    #   else {
-    #     spTemp = rbind(
-    #       spTemp, readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i])
-    #       # If the PROJ4 string has been set, use the following instead
-    #       # spTemp, readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i], p4s)
-    #     )
-    #   }
-    # }
-    # # Create SpatialPolygonsDataFrame, drop WKT field from attributes
-    # spdfFinal = SpatialPolygonsDataFrame(spTemp, dfTemp[-2])
+    sql_geom<-"select * from geometry_columns where f_table_name ='vw_tmp_read_ogr';"
+    dfgeom<-dbGetQuery(conn,sql_geom)
+    geom_name<-dfgeom$f_geometry_column
+    srid_name<-dfgeom$srid
+    geom_type<-dfgeom$type
+    sql_proj4<-paste0('select proj4text from spatial_ref_sys where srid=',srid_name)
+    proj4text<-dbGetQuery(conn,sql_proj4)$proj4text
+    sql_export<-paste0('select st_asgeojson(',geom_name,') from vw_tmp_read_ogr')
+    dfTemp<-dbGetQuery(conn,sql_export)$st_asgeojson
+    cat(dfTemp,file =(con<-file(file.path(tempdir(),'temp.json'),'w',encoding = 'UTF-8')) )
+    close(con)
+    ## Get spatial data via geojson
+    spdfFinal = suppressWarnings(rgdal::readOGR(
+      dsn = file.path(tempdir(),'temp.json'),p4s = proj4text,
+      verbose = F,layer = "OGRGeoJSON",stringsAsFactors = F))
+    # load attribute table of spatial data
+    dfdata<-dbGetQuery(conn,'select * from vw_tmp_read_ogr')
+    spdfFinal@data<-eval(parse(text=paste0('subset(dfdata,select = -c(',geom_name,'))')))
   }else{
-
     spdfFinal = readOGR(dsn = dsn, layer = "vw_tmp_read_ogr", ...)
-
   }
   dbSendQuery(conn, "DROP VIEW vw_tmp_read_ogr;")
   dbDisconnect(conn)
