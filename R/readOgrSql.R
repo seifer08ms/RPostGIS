@@ -15,6 +15,22 @@
 #' @references \url{https://geospatial.commons.gc.cuny.edu/2013/12/31/subsetting-in-readogr/}
 #' @references \url{https://geospatial.commons.gc.cuny.edu/2014/01/14/load-postgis-geometries-in-r-without-rgdal/}
 readOgrSql = function (dsn, sql, ...) {
+  get_os <- function(){
+    sysinf <- Sys.info()
+    if (!is.null(sysinf)){
+      os <- sysinf['sysname']
+      if (os == 'Darwin')
+        os <- "osx"
+    } else { ## mystery machine
+      os <- .Platform$OS.type
+      if (grepl("^darwin", R.version$os))
+        os <- "osx"
+      if (grepl("linux-gnu", R.version$os))
+        os <- "linux"
+    }
+    tolower(os)
+  }
+
   require(rgdal)
   require(RPostgreSQL)
   require(stringr)
@@ -93,19 +109,4 @@ readOgrSql = function (dsn, sql, ...) {
   dbSendQuery(conn, "DROP VIEW vw_tmp_read_ogr;")
   dbDisconnect(conn)
   return(spdfFinal)
-}
-.get_os <- function(){
-  sysinf <- Sys.info()
-  if (!is.null(sysinf)){
-    os <- sysinf['sysname']
-    if (os == 'Darwin')
-      os <- "osx"
-  } else { ## mystery machine
-    os <- .Platform$OS.type
-    if (grepl("^darwin", R.version$os))
-      os <- "osx"
-    if (grepl("linux-gnu", R.version$os))
-      os <- "linux"
-  }
-  tolower(os)
 }
