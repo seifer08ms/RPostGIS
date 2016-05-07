@@ -14,7 +14,7 @@
 #'
 #' @references \url{https://geospatial.commons.gc.cuny.edu/2013/12/31/subsetting-in-readogr/}
 #' @references \url{https://geospatial.commons.gc.cuny.edu/2014/01/14/load-postgis-geometries-in-r-without-rgdal/}
-readOgrSql = function (dsn, sql, ...) {
+readOgrSql = function (dsn, sql, gdal=T, ...) {
   get_os <- function(){
     sysinf <- Sys.info()
     if (!is.null(sysinf)){
@@ -68,7 +68,7 @@ readOgrSql = function (dsn, sql, ...) {
   sql_encoding<-
     "SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = 'mydb';"
   db_encode<-dbGetQuery(conn, sql_encoding)$pg_encoding_to_char
-  if(as.character(get_os())=='windows'){
+  if(as.character(get_os())=='windows'|gdal==F){
     sql_geom<-"select * from geometry_columns where f_table_name ='vw_tmp_read_ogr';"
     dfgeom<-dbGetQuery(conn,sql_geom)
     geom_name<-dfgeom$f_geometry_column
