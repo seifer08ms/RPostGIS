@@ -77,13 +77,30 @@ readOgrSql = function (dsn, sql, ...) {
     sql_proj4<-paste0('select proj4text from spatial_ref_sys where srid=',srid_name)
     proj4text<-dbGetQuery(conn,sql_proj4)$proj4text
     sql_export<-paste0('select st_asgeojson(',geom_name,') from vw_tmp_read_ogr')
-    dfTemp<-dbGetQuery(conn,sql_export)$st_asgeojson
-    cat(dfTemp,file =(con<-file(file.path(tempdir(),'temp.json'),'w',encoding = 'UTF-8')) )
-    close(con)
-    ## Get spatial data via geojson
-    spdfFinal = suppressWarnings(rgdal::readOGR(
-      dsn = file.path(tempdir(),'temp.json'),p4s = proj4text,
-      verbose = F,layer = "OGRGeoJSON",stringsAsFactors = F))
+    dfTemp<-dbGetQuery(conn,sql_export)[,1]
+    tempdsn<-file.path(tempdir(),'temp.json')
+    for(i in 1:length(dfTemp)){
+      if(i==1){
+        cat(dfTemp[i],file =(con<-file(tempdsn,'w',encoding = 'UTF-8')) )
+        close(con)
+        ## Get spatial data via geojson
+        spdfFinal = suppressWarnings(rgdal::readOGR(
+          dsn =tempdsn,p4s = proj4text,
+          verbose = F,layer = ogrListLayers(tempdsn)[1],stringsAsFactors = F))
+        spdfFinal<-spChFIDs(spdfFinal,paste0('layer',i) )
+      }else{
+        cat(dfTemp[i],file =(con<-file(tempdsn,'w',encoding = 'UTF-8')) )
+        close(con)
+        ## Get spatial data via geojson
+        layer<-suppressWarnings(rgdal::readOGR(
+          dsn =tempdsn,p4s = proj4text,
+          verbose = F,layer = ogrListLayers(tempdsn)[1],stringsAsFactors = F))
+        layer<-spChFIDs(layer,paste0('layer',i) )
+        spdfFinal = maptools::spRbind(spdfFinal, layer)
+      }
+
+    }
+
     # load attribute table of spatial data
     dfdata<-dbGetQuery(conn,'select * from vw_tmp_read_ogr')
     spdfFinal@data<-eval(parse(text=paste0('subset(dfdata,select = -c(',geom_name,'))')))
