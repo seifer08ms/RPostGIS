@@ -69,7 +69,7 @@ readOgrSql = function (dsn, sql, ...) {
   sql_encoding<-
     "SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = 'mydb';"
   db_encode<-dbGetQuery(conn, sql_encoding)
-  if(as.character(get_os)=='windows'){
+  if(as.character(get_os())=='windows'){
     ogr2ogr(src_datasource_name = dsn,
             layer = 'vw_tmp_read_ogr',verbose = T,f = 'ESRI Shapefile',
             dst_datasource_name = tempdir(),overwrite = T)
