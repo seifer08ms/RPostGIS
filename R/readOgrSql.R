@@ -13,6 +13,7 @@
 #' spdfStates = readOgrSql(dsn, strSQL, stringsAsFactors=FALSE)}
 #'
 #' @references \url{https://geospatial.commons.gc.cuny.edu/2013/12/31/subsetting-in-readogr/}
+#' @references \url{https://geospatial.commons.gc.cuny.edu/2014/01/14/load-postgis-geometries-in-r-without-rgdal/}
 readOgrSql = function (dsn, sql, ...) {
   require(rgdal)
   require(RPostgreSQL)
@@ -49,8 +50,62 @@ readOgrSql = function (dsn, sql, ...) {
   dbSendQuery(conn, "DROP VIEW IF EXISTS vw_tmp_read_ogr;")
   strCreateView = paste("CREATE VIEW vw_tmp_read_ogr AS", sql)
   dbSendQuery(conn, strCreateView)
-  temp = readOGR(dsn = dsn, layer = "vw_tmp_read_ogr", ...)
+  sql_encoding<-
+    "SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname = 'mydb';"
+  db_encode<-dbGetQuery(conn, sql_encoding)
+  if(as.character(get_os)=='windows'){
+    ogr2ogr(src_datasource_name = dsn,
+            layer = 'vw_tmp_read_ogr',verbose = T,f = 'ESRI Shapefile',
+            dst_datasource_name = tempdir(),overwrite = T)
+    spdfFinal = readOGR(dsn = file.path(tempdir(),'vw_tmp_read_ogr.shp'),
+                        layer = "vw_tmp_read_ogr",stringsAsFactors = F, ...)
+    # library(RPostgreSQL)
+    # library(rgeos)
+    # library(sp)
+    # dfTemp = dbGetQuery(conn, 'select * from vw_tmp_read_ogr;')
+    # row.names(dfTemp) = dfTemp$gid
+    # # Create spatial polygons
+    # # To set the PROJ4 string, enter the EPSG SRID and uncomment the
+    # # following two lines:
+    # # EPSG = make_EPSG()
+    # # p4s = EPSG[which(EPSG$code == SRID), "prj4"]
+    # for (i in seq(nrow(dfTemp))) {
+    #   if (i == 1) {
+    #     spTemp = readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i])
+    #     # If the PROJ4 string has been set, use the following instead
+    #     # spTemp = readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i], p4s)
+    #   }
+    #   else {
+    #     spTemp = rbind(
+    #       spTemp, readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i])
+    #       # If the PROJ4 string has been set, use the following instead
+    #       # spTemp, readWKT(dfTemp$wkt_geometry[i], dfTemp$gid[i], p4s)
+    #     )
+    #   }
+    # }
+    # # Create SpatialPolygonsDataFrame, drop WKT field from attributes
+    # spdfFinal = SpatialPolygonsDataFrame(spTemp, dfTemp[-2])
+  }else{
+
+    spdfFinal = readOGR(dsn = dsn, layer = "vw_tmp_read_ogr", ...)
+
+  }
   dbSendQuery(conn, "DROP VIEW vw_tmp_read_ogr;")
   dbDisconnect(conn)
-  return(temp)
+  return(spdfFinal)
+}
+.get_os <- function(){
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+    os <- sysinf['sysname']
+    if (os == 'Darwin')
+      os <- "osx"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "osx"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "linux"
+  }
+  tolower(os)
 }
