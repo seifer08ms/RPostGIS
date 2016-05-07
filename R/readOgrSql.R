@@ -21,6 +21,7 @@ readOgrSql = function (dsn, sql, ...) {
   if (str_sub(dsn, 1, 3) != "PG:") {
     stop("readOgrSql only works with PostgreSQL DSNs")
   }
+  dsn<-str_replace_all(dsn,'  ',' ')
   dsnParamList = str_trim(str_split(dsn, ":")[[1]][2])
   # Build dbConnect expression, quote DSN parameter values
   # if not already quoted
