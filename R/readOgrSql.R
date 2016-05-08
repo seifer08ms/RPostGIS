@@ -92,7 +92,7 @@ readOgrSql = function (dsn, sql, gdal=T, ...) {
     # sql_export<-paste0('select st_asgeojson(',geom_name,') from vw_tmp_read_ogr')
     dfTemp<-dbGetQuery(conn,sql_export)[,1]
     tempdsn<-file.path(tempdir(),'temp.json')
-    cat(dfTemp,file =(con<-file(tempdsn,'w',encoding = 'UTF-8')) )
+    cat(iconv(dfTemp,'utf-8','gbk'), file = (con <- file(tempdsn, "w")))
     close(con)
     ## Get spatial data via geojson
     spdfFinal = suppressWarnings(rgdal::readOGR(
