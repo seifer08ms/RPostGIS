@@ -97,7 +97,7 @@ readOgrSql = function (dsn, sql, gdal=T, ...) {
     ## Get spatial data via geojson
     spdfFinal = suppressWarnings(rgdal::readOGR(
       dsn =tempdsn,p4s = proj4text,
-      verbose = F,layer = ogrListLayers(tempdsn)[1],stringsAsFactors = F))
+      verbose = F,layer = ogrListLayers(tempdsn)[1],stringsAsFactors = F, ...))[,-1]
   }else{
     spdfFinal = readOGR(dsn = dsn, layer = "vw_tmp_read_ogr", ...)
   }
