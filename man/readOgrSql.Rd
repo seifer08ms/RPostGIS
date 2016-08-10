@@ -4,7 +4,7 @@
 \alias{readOgrSql}
 \title{Read an PostgreSQL data source into Spatial objects.}
 \usage{
-readOgrSql(dsn, sql, ...)
+readOgrSql(dsn, sql, gdal = T, ...)
 }
 \arguments{
 \item{dsn}{PostgreSQL DSNs}
@@ -26,6 +26,8 @@ spdfStates = readOgrSql(dsn, strSQL, stringsAsFactors=FALSE)}
 }
 \references{
 \url{https://geospatial.commons.gc.cuny.edu/2013/12/31/subsetting-in-readogr/}
+
+\url{https://geospatial.commons.gc.cuny.edu/2014/01/14/load-postgis-geometries-in-r-without-rgdal/}
 }
 \keyword{readOgrSql}
 
