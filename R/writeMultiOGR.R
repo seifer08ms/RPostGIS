@@ -8,12 +8,13 @@
 #' @param username If shp2pgsql is true,a charater is required to indicate current user
 #' @param verbose a boolean variable indicating whether to display verbose information
 #' @param  encode a character indicating encode of vector data
+#' @param ... other extra parameters to be passed to ogr2ogr(such as lco)
 #' @return Spatial DataFrame
 #' @keywords writeMultiOGR
 #' @export
 
 writeMultiOGR<-function(x,dsn,nln=' ',verbose=F,srid='4326',dbname='mydb',host=' ',username=' ',
-                        simplify = T,shp2pgsql=F,encode=NULL)
+                        simplify = T,shp2pgsql=F,encode=NULL,...)
 {
     require(gdalUtils)
     require(rgdal)
@@ -54,7 +55,7 @@ writeMultiOGR<-function(x,dsn,nln=' ',verbose=F,srid='4326',dbname='mydb',host='
                 #                     lco =c('ENCODING=UTF-8'),
                 a_srs = proj4string(x),
                 nln =nln,layer = "ttt_ogrm",verbose=verbose,
-                nlt='PROMOTE_TO_MULTI',overwrite = T)
+                nlt='PROMOTE_TO_MULTI',overwrite = T,...)
     }
     setCPLConfigOption("SHAPE_ENCODING", '')
 }

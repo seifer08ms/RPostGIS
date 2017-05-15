@@ -6,7 +6,7 @@
 \usage{
 writeMultiOGR(x, dsn, nln = " ", verbose = F, srid = "4326",
   dbname = "mydb", host = " ", username = " ", simplify = T,
-  shp2pgsql = F, encode = NULL)
+  shp2pgsql = F, encode = NULL, ...)
 }
 \arguments{
 \item{x}{a object}
@@ -26,6 +26,8 @@ writeMultiOGR(x, dsn, nln = " ", verbose = F, srid = "4326",
 \item{username}{If shp2pgsql is true,a charater is required to indicate current user}
 
 \item{encode}{a character indicating encode of vector data}
+
+\item{...}{other extra parameters to be passed to ogr2ogr(such as lco)}
 }
 \value{
 Spatial DataFrame
